@@ -2,65 +2,71 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
-const bcrypt = require("bcrypt");
-
-dotenv.config();
-
+const User = require("./models/userModel");
+dotenv.config(); // Load environment variables
+const cors = require('cors');
 const app = express();
 const PORT = 3000;
-
+const bcrypt = require("bcrypt");
 // Middleware
+// CORS Middleware
+app.use(cors({
+  origin: "*",
+  credentials: true,
+  methods: ["*"],
+  allowedHeaders: ["*"]
+}));
 app.use(bodyParser.json());
-
+console.log("oombuuu");
 // MongoDB Connection
-mongoose
-  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connected to MongoDB Atlas"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+const connectToMongo = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Connected to MongoDB Atlas");
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    process.exit(1); // Stop the server if MongoDB connection fails
+  }
+};
 
-// User Schema and Model
-const userSchema = new mongoose.Schema({
-  userName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  phoneNumber: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-});
-
-const User = mongoose.model("User", userSchema);
+// Call MongoDB connection function
+connectToMongo();
 
 // Routes
+// 1. Register a new user
 app.post("/register", async (req, res) => {
+  console.log('register');
   const { userName, email, phoneNumber, password } = req.body;
 
-  if (!userName || !email || !phoneNumber || !password) {
-    return res.status(400).json({ message: "All fields are required." });
+  if (!phoneNumber || !password || !userName || !email) {
+    return res.status(400).json({ message: "required" });
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({
-      userName,
-      email,
-      phoneNumber,
-      password: hashedPassword,
-    });
-
-    await user.save();
-    res.status(201).json({ message: "User registered successfully." });
+    const hashedPassword = await bcrypt.hash(password, 10); 
+    const user = new User({ userName, email, phoneNumber, password: hashedPassword }); 
+        await user.save();
+    res.status(201).json({ message: "registered" });
   } catch (error) {
+    console.error("Error registering user:", error); 
     if (error.code === 11000) {
-      res.status(409).json({ message: "Email or phone number already registered." });
+      res.status(409).json({ message: "exists" });
     } else {
       res.status(500).json({ message: "Error registering user.", error });
     }
   }
 });
 
+// 2. Login
+
+
 app.post("/login", async (req, res) => {
+  console.log('login');
+
   const { identifier, password } = req.body;
 
   if (!identifier || !password) {
-    return res.status(400).json({ message: "Email/Phone and password are required." });
+    return res.status(400).json({ message: "User and password are required." });
   }
 
   try {
@@ -69,21 +75,28 @@ app.post("/login", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return res.status(404).json({ message: "New" });
     }
 
+    // Compare hashed password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid password." });
+      return res.status(401).json({ message: "Invalid" });
     }
 
-    res.status(200).json({ message: "Login successful." });
+    res.status(200).json({ message: "Login" });
   } catch (error) {
+    console.error("Error logging in:", error); // Log the error details
     res.status(500).json({ message: "Error logging in.", error });
   }
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Start server with try-catch block
+try {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+} catch (error) {
+  console.error("Error starting the server:", error); // Log server start error
+  process.exit(1); // Exit the process if the server fails to start
+}

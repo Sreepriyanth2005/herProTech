@@ -45,5 +45,6 @@ class StyleConstants {
     fontFamily: 'Inter',
     color: Color.fromRGBO(53, 50, 43, 1),
     height: 1.25,
+ 
   );
 }

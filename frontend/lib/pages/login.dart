@@ -24,16 +24,17 @@ class LoginPage extends StatelessWidget {
               child: CompanyName(),
             ),
           ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                PageNameWidget(name: 'Login Page'),
-                ResponsiveSizedBox(width: 0, height: 10),
-                LoginContainer(),
-              ],
-            ),
+         Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  PageNameWidget(name: 'Login Page'),
+                  ResponsiveSizedBox(width: 0, height: 10),
+                  LoginContainer(),
+                ],
+              ),
+            
           ),
         ],
       ),
