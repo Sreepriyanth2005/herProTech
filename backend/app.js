@@ -21,7 +21,7 @@ console.log("oombuuu");
 // MongoDB Connection
 const connectToMongo = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongoose.connect('mongodb+srv://sreepriyanth2005:JQftPu5vWjbZ9ob8@cluster0.kd5ut.mongodb.net/myDatabase?retryWrites=true&w=majority&appName=Cluster0', { useNewUrlParser: true, useUnifiedTopology: true });
     console.log("Connected to MongoDB Atlas");
   } catch (err) {
     console.error("MongoDB connection error:", err);
