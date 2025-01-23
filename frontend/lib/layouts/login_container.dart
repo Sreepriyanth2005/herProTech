@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:herprotech/model/user_model.dart';
+import 'package:herprotech/storage/store_values.dart';
 import 'package:http/http.dart' as http;
 import 'package:herprotech/assets/style_constants.dart';
 import 'package:herprotech/config/config.dart';
@@ -48,13 +50,16 @@ class _LoginContainerState extends State<LoginContainer> {
       setState(() {
         isLoading = false;
       });
-
-      print('Response Status Code: ${response.statusCode}');
-
       final responseData = jsonDecode(response.body);
       final message = responseData['message'];
 
       if (message == 'Login') {
+        UserModel user = UserModel(
+          email: responseData['email'],
+          userName: responseData['userName'],
+          phoneNumber: responseData['phoneNumber'],
+        );
+        await StoreService.storeEmployeeData(user);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Login successful'),

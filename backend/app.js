@@ -4,24 +4,29 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const User = require("./models/userModel");
 dotenv.config(); // Load environment variables
-const cors = require('cors');
+const cors = require("cors");
 const app = express();
 const PORT = 3000;
 const bcrypt = require("bcrypt");
 // Middleware
 // CORS Middleware
-app.use(cors({
-  origin: "*",
-  credentials: true,
-  methods: ["*"],
-  allowedHeaders: ["*"]
-}));
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    methods: ["*"],
+    allowedHeaders: ["*"],
+  })
+);
 app.use(bodyParser.json());
 console.log("oombuuu");
 // MongoDB Connection
 const connectToMongo = async () => {
   try {
-    await mongoose.connect('mongodb+srv://sreepriyanth2005:JQftPu5vWjbZ9ob8@cluster0.kd5ut.mongodb.net/myDatabase?retryWrites=true&w=majority&appName=Cluster0', { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongoose.connect(
+      "mongodb+srv://sreepriyanth2005:JQftPu5vWjbZ9ob8@cluster0.kd5ut.mongodb.net/myDatabase?retryWrites=true&w=majority&appName=Cluster0",
+      { useNewUrlParser: true, useUnifiedTopology: true }
+    );
     console.log("Connected to MongoDB Atlas");
   } catch (err) {
     console.error("MongoDB connection error:", err);
@@ -35,7 +40,7 @@ connectToMongo();
 // Routes
 // 1. Register a new user
 app.post("/register", async (req, res) => {
-  console.log('register');
+  console.log("register");
   const { userName, email, phoneNumber, password } = req.body;
 
   if (!phoneNumber || !password || !userName || !email) {
@@ -43,12 +48,17 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10); 
-    const user = new User({ userName, email, phoneNumber, password: hashedPassword }); 
-        await user.save();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      userName,
+      email,
+      phoneNumber,
+      password: hashedPassword,
+    });
+    await user.save();
     res.status(201).json({ message: "registered" });
   } catch (error) {
-    console.error("Error registering user:", error); 
+    console.error("Error registering user:", error);
     if (error.code === 11000) {
       res.status(409).json({ message: "exists" });
     } else {
@@ -59,9 +69,8 @@ app.post("/register", async (req, res) => {
 
 // 2. Login
 
-
 app.post("/login", async (req, res) => {
-  console.log('login');
+  console.log("login");
 
   const { identifier, password } = req.body;
 
@@ -71,8 +80,14 @@ app.post("/login", async (req, res) => {
 
   try {
     const user = await User.findOne({
-      $or: [{ email: identifier }, { phoneNumber: identifier },{userName:identifier}],
+      $or: [
+        { email: identifier },
+        { phoneNumber: identifier },
+        { userName: identifier },
+      ],
     });
+
+    console.log("user", user);
 
     if (!user) {
       return res.status(404).json({ message: "New" });
@@ -83,8 +98,13 @@ app.post("/login", async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid" });
     }
-
-    res.status(200).json({ message: "Login" });
+    const userObj = {
+      userName: user.userName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      message: "Login",
+    };
+    res.status(200).json(userObj);
   } catch (error) {
     console.error("Error logging in:", error); // Log the error details
     res.status(500).json({ message: "Error logging in.", error });

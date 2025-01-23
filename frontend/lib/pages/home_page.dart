@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:herprotech/assets/style_constants.dart';
+import 'package:herprotech/model/user_model.dart';
 import 'package:herprotech/pages/add_member.dart';
 import 'package:herprotech/pages/edit_profile.dart';
+import 'package:herprotech/storage/store_values.dart';
 import 'package:herprotech/widgets/sos_button.dart';
 import 'package:herprotech/wrapper/responsive_container.dart';
 import 'package:herprotech/wrapper/responsive_sizedBox.dart';
@@ -15,6 +17,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late String username;
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  void _fetchUserName() async {
+    UserModel user = await StoreService.getEmployeeData();
+    setState(() {
+      username = user.userName!;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +50,7 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               children: [
                 ResponsiveText(
-                  'Welcome, username',
+                  'Welcome, $username',
                   style: StyleConstants.customStyle(
                       16, Colors.black, FontWeight.w500),
                 ),
@@ -98,7 +114,10 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.people,color: Colors.white,),
+                leading: Icon(
+                  Icons.people,
+                  color: Colors.white,
+                ),
                 title: ResponsiveText(
                   'Add Members',
                   style: StyleConstants.customStyle(
